@@ -11,6 +11,15 @@ const nextConfig: NextConfig = {
       canvas: "./src/lib/emptyCanvas.ts",
     },
   },
+  webpack: (config) => {
+    config.resolve = config.resolve ?? {};
+    config.resolve.alias = {
+      ...(config.resolve.alias ?? {}),
+      canvas: path.join(root, "src/lib/emptyCanvas.ts"),
+    };
+
+    return config;
+  },
 };
 
 export default nextConfig;

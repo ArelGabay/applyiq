@@ -107,6 +107,7 @@ export const mockAnalyses: AnalysisResult[] = [
 ];
 
 export const defaultAnalysis = mockAnalyses[0];
+export const API_ANALYSIS_STORAGE_KEY = "applyiq.latestApiAnalysis";
 
 export function findAnalysis(id?: string | string[]) {
   const normalizedId = Array.isArray(id) ? id[0] : id;

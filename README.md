@@ -30,7 +30,7 @@ paste a job description, and review a clear application strategy.
 - Dashboard mock workflow for resume upload, role/company details, and job description input
 - Analysis results with ATS score, missing keywords, matched keywords, resume suggestions, AI rewrite examples, and cover letter preview
 - Copyable mock cover letter output
-- Minimal FastAPI placeholder for future API work
+- Local FastAPI mock endpoint for full-stack demo development
 
 ## Screenshots
 
@@ -51,8 +51,8 @@ paste a job description, and review a clear application strategy.
 | Area      | Tech                                      |
 | --------- | ----------------------------------------- |
 | Frontend  | Next.js, TypeScript, Tailwind CSS         |
-| Backend   | FastAPI, Python placeholder               |
-| Data      | Local mock analysis data                  |
+| Backend   | FastAPI, Python mock API                  |
+| Data      | Local mock data with optional API mock flow |
 | AI        | Mock AI output first, OpenAI planned later |
 | Database  | PostgreSQL planned later                  |
 
@@ -97,8 +97,8 @@ If a Next.js command reports an old Node version, confirm `node -v` prints
 
 ## Backend
 
-The backend is intentionally light for this phase. It gives the repo a clear
-FastAPI direction without becoming a dependency for the frontend demo.
+The backend is intentionally light for this phase. It provides a local FastAPI
+mock analysis endpoint without becoming a dependency for the deployed frontend.
 
 ```bash
 cd backend
@@ -112,6 +112,32 @@ Routes:
 
 - `GET /health`
 - `POST /analysis/mock`
+
+### Connect frontend to local backend
+
+Create a local frontend env file:
+
+```bash
+cd frontend
+cp .env.example .env.local
+```
+
+Then run both apps:
+
+```bash
+# terminal 1
+cd backend
+source .venv/bin/activate
+uvicorn app.main:app --reload
+
+# terminal 2
+cd frontend
+npm run dev
+```
+
+With `NEXT_PUBLIC_API_URL=http://localhost:8000`, the dashboard submit flow calls
+FastAPI, stores the API mock result in `sessionStorage`, and routes to
+`/analysis?source=api`.
 
 ## Deployment
 
@@ -132,7 +158,7 @@ Production deployment:
 
 ## Future roadmap
 
-1. Replace mock analysis data with a real FastAPI endpoint.
+1. Deploy the FastAPI backend and point production frontend at it.
 2. Add resume text extraction for PDF/DOCX uploads.
 3. Integrate OpenAI for scoring, keyword extraction, rewrites, and cover letters.
 4. Add PostgreSQL persistence for saved analyses.
@@ -140,6 +166,8 @@ Production deployment:
 
 ## Notes
 
-This MVP deliberately avoids authentication, payments, real ATS integrations,
-LinkedIn scraping, and production AI calls. The goal is a fast, clean product
-demo that is easy to extend.
+The deployed Vercel frontend intentionally works without backend environment
+variables by falling back to local mock data. This MVP deliberately avoids
+authentication, payments, real ATS integrations, LinkedIn scraping, and
+production AI calls. The goal is a fast, clean product demo that is easy to
+extend.

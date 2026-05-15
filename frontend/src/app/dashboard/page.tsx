@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, LinkButton } from "@/components/Button";
 import { Card, SectionHeader } from "@/components/Card";
-import { mockAnalyses } from "@/lib/mockAnalysis";
+import { API_ANALYSIS_STORAGE_KEY, mockAnalyses } from "@/lib/mockAnalysis";
 
 const sampleJobDescription =
   "We are looking for a Senior Frontend Engineer with strong React, TypeScript, Next.js, accessibility, performance, and design system experience. Familiarity with GraphQL, CI/CD, and AWS is a plus.";
@@ -16,6 +16,8 @@ export default function DashboardPage() {
   const [role, setRole] = useState("Senior Frontend Engineer");
   const [company, setCompany] = useState("Acme Corp");
   const [jobDescription, setJobDescription] = useState(sampleJobDescription);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const selectedAnalysisId = useMemo(() => {
     const normalizedRole = role.toLowerCase();
@@ -24,12 +26,52 @@ export default function DashboardPage() {
       : "frontend-engineer";
   }, [role]);
 
-  function handleAnalyze() {
+  async function handleAnalyze() {
+    setApiError("");
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const cleanRole = role.trim() || "Senior Frontend Engineer";
+    const cleanCompany = company.trim() || "Acme Corp";
+    const cleanResumeName = resumeName.trim() || "Resume.pdf";
+
+    if (apiUrl) {
+      setIsAnalyzing(true);
+
+      try {
+        const response = await fetch(`${apiUrl}/analysis/mock`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            role: cleanRole,
+            company: cleanCompany,
+            resume_name: cleanResumeName,
+            job_description: jobDescription,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("API mock analysis failed");
+        }
+
+        const analysis = await response.json();
+        sessionStorage.setItem(API_ANALYSIS_STORAGE_KEY, JSON.stringify(analysis));
+        router.push("/analysis?source=api");
+        return;
+      } catch {
+        setApiError(
+          "The local API is not reachable, so ApplyIQ used the built-in mock fallback.",
+        );
+      } finally {
+        setIsAnalyzing(false);
+      }
+    }
+
     const params = new URLSearchParams({
       id: selectedAnalysisId,
-      role: role.trim() || "Senior Frontend Engineer",
-      company: company.trim() || "Acme Corp",
-      resume: resumeName.trim() || "Resume.pdf",
+      role: cleanRole,
+      company: cleanCompany,
+      resume: cleanResumeName,
     });
 
     router.push(`/analysis?${params.toString()}`);
@@ -118,11 +160,20 @@ export default function DashboardPage() {
             </label>
 
             <div className="flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-slate-500">
-                This generates a polished mock result. No files leave the browser.
-              </p>
-              <Button type="button" onClick={handleAnalyze}>
-                Analyze resume
+              <div>
+                <p className="text-sm text-slate-500">
+                  {process.env.NEXT_PUBLIC_API_URL
+                    ? "Uses the local FastAPI mock endpoint, then stores the result in this browser."
+                    : "This generates a polished local mock result. No files leave the browser."}
+                </p>
+                {apiError ? (
+                  <p className="mt-2 text-sm font-medium text-amber-700">
+                    {apiError}
+                  </p>
+                ) : null}
+              </div>
+              <Button type="button" onClick={handleAnalyze} disabled={isAnalyzing}>
+                {isAnalyzing ? "Analyzing..." : "Analyze resume"}
               </Button>
             </div>
           </div>

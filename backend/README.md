@@ -1,6 +1,6 @@
 # ApplyIQ Backend
 
-Minimal FastAPI placeholder for the future ApplyIQ API.
+Minimal FastAPI mock API for the ApplyIQ full-stack demo.
 
 ## Run locally
 
@@ -14,7 +14,25 @@ uvicorn app.main:app --reload
 ## Routes
 
 - `GET /health` returns API health.
-- `POST /analysis/mock` returns mock resume analysis JSON.
+- `POST /analysis/mock` returns mock resume analysis JSON shaped for the frontend.
 
-The frontend MVP does not depend on this service yet. Real resume parsing,
-PostgreSQL persistence, and OpenAI calls are intentionally future work.
+Example request:
+
+```json
+{
+  "role": "Senior Frontend Engineer",
+  "company": "Acme Corp",
+  "resume_name": "Arel_Gabay_Resume.pdf",
+  "job_description": "Job description text..."
+}
+```
+
+The frontend can call this API locally with:
+
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+The deployed frontend does not depend on this service yet. Real resume parsing,
+PostgreSQL persistence, OpenAI calls, and backend deployment are intentionally
+future work.

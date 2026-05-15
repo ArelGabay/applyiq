@@ -60,7 +60,7 @@ export default function DashboardPage() {
         return;
       } catch {
         setApiError(
-          "The local API is not reachable, so ApplyIQ used the built-in mock fallback.",
+          "The API is not reachable, so ApplyIQ used the built-in mock fallback.",
         );
       } finally {
         setIsAnalyzing(false);
@@ -163,7 +163,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-sm text-slate-500">
                   {process.env.NEXT_PUBLIC_API_URL
-                    ? "Uses the local FastAPI mock endpoint, then stores the result in this browser."
+                    ? "Uses the configured FastAPI mock endpoint, then stores the result in this browser."
                     : "This generates a polished local mock result. No files leave the browser."}
                 </p>
                 {apiError ? (

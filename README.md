@@ -156,13 +156,17 @@ Production deployment:
 
 - <https://applyiq-arel.vercel.app>
 
+Backend deployment:
+
+- Public API: <https://applyiq-api-arel.vercel.app>
+- Frontend production `NEXT_PUBLIC_API_URL` points at the public API.
+
 ## Future roadmap
 
-1. Deploy the FastAPI backend and point production frontend at it.
-2. Add resume text extraction for PDF/DOCX uploads.
-3. Integrate OpenAI for scoring, keyword extraction, rewrites, and cover letters.
-4. Add PostgreSQL persistence for saved analyses.
-5. Add authentication only after the core workflow is useful.
+1. Add resume text extraction for PDF/DOCX uploads.
+2. Integrate OpenAI for scoring, keyword extraction, rewrites, and cover letters.
+3. Add PostgreSQL persistence for saved analyses.
+4. Add authentication only after the core workflow is useful.
 
 ## Notes
 

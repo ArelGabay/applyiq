@@ -9,6 +9,21 @@ ApplyIQ is a portfolio-ready job application assistant. The MVP uses polished
 mock data to demonstrate how a user could upload a resume, compare it with a job
 description, and receive ATS-focused guidance.
 
+## Why I built this
+
+Job seekers often know their resume needs to be tailored, but it is hard to see
+which keywords, skills, and proof points matter for a specific role. ApplyIQ
+turns that messy comparison into a focused product workflow: upload a resume,
+paste a job description, and review a clear application strategy.
+
+## What this demonstrates
+
+- Production-style Next.js app structure with TypeScript and Tailwind CSS
+- A polished multi-page product flow with realistic mock AI output
+- ATS scoring, keyword gap analysis, resume rewrite examples, and cover letter preview
+- Frontend-first MVP thinking with a documented FastAPI path for future backend work
+- Public deployment on Vercel with a portfolio-ready README
+
 ## MVP status
 
 - Landing page with product positioning and sample analysis preview
@@ -19,11 +34,17 @@ description, and receive ATS-focused guidance.
 
 ## Screenshots
 
-Screenshots to add next:
+### Landing page
 
-- Landing page
-- Dashboard workflow
-- Analysis results
+![ApplyIQ landing page](docs/screenshots/landing.png)
+
+### Dashboard workflow
+
+![ApplyIQ dashboard workflow](docs/screenshots/dashboard.png)
+
+### Analysis results
+
+![ApplyIQ analysis results](docs/screenshots/analysis.png)
 
 ## Tech stack
 

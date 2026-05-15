@@ -6,13 +6,19 @@ import { useRouter } from "next/navigation";
 import { Button, LinkButton } from "@/components/Button";
 import { Card, SectionHeader } from "@/components/Card";
 import { API_ANALYSIS_STORAGE_KEY, mockAnalyses } from "@/lib/mockAnalysis";
+import { extractResumeText } from "@/lib/resumeText";
 
 const sampleJobDescription =
   "We are looking for a Senior Frontend Engineer with strong React, TypeScript, Next.js, accessibility, performance, and design system experience. Familiarity with GraphQL, CI/CD, and AWS is a plus.";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [resumeName, setResumeName] = useState("Arel_Gabay_Resume.pdf");
+  const [resumeName, setResumeName] = useState("");
+  const [resumeText, setResumeText] = useState("");
+  const [resumeStatus, setResumeStatus] = useState<
+    "idle" | "extracting" | "ready" | "error"
+  >("idle");
+  const [resumeError, setResumeError] = useState("");
   const [role, setRole] = useState("Senior Frontend Engineer");
   const [company, setCompany] = useState("Acme Corp");
   const [jobDescription, setJobDescription] = useState(sampleJobDescription);
@@ -28,10 +34,23 @@ export default function DashboardPage() {
 
   async function handleAnalyze() {
     setApiError("");
+    setResumeError("");
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const cleanRole = role.trim() || "Senior Frontend Engineer";
     const cleanCompany = company.trim() || "Acme Corp";
     const cleanResumeName = resumeName.trim() || "Resume.pdf";
+    const cleanResumeText = resumeText.trim();
+
+    if (resumeStatus === "extracting") {
+      setResumeError("Wait for resume text extraction to finish before analyzing.");
+      return;
+    }
+
+    if (!cleanResumeText) {
+      setResumeStatus("error");
+      setResumeError("Choose a TXT, PDF, or DOCX resume before analyzing.");
+      return;
+    }
 
     if (apiUrl) {
       setIsAnalyzing(true);
@@ -46,6 +65,7 @@ export default function DashboardPage() {
             role: cleanRole,
             company: cleanCompany,
             resume_name: cleanResumeName,
+            resume_text: cleanResumeText,
             job_description: jobDescription,
           }),
         });
@@ -75,6 +95,41 @@ export default function DashboardPage() {
     });
 
     router.push(`/analysis?${params.toString()}`);
+  }
+
+  async function handleResumeFileChange(file: File | undefined) {
+    setResumeError("");
+    setApiError("");
+
+    if (!file) {
+      setResumeName("");
+      setResumeText("");
+      setResumeStatus("idle");
+      return;
+    }
+
+    setResumeName(file.name);
+    setResumeText("");
+    setResumeStatus("extracting");
+
+    try {
+      const result = await extractResumeText(file);
+
+      if (!result.text) {
+        throw new Error("No readable text was found in this resume.");
+      }
+
+      setResumeText(result.text);
+      setResumeStatus("ready");
+    } catch (error) {
+      setResumeText("");
+      setResumeStatus("error");
+      setResumeError(
+        error instanceof Error
+          ? error.message
+          : "Could not extract text from this resume.",
+      );
+    }
   }
 
   return (
@@ -117,34 +172,52 @@ export default function DashboardPage() {
               />
             </label>
 
-            <label className="block">
+            <div className="block">
               <span className="text-sm font-semibold text-slate-800">
                 Resume file
               </span>
               <div className="mt-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className="font-semibold text-slate-950">{resumeName}</p>
+                    <p className="font-semibold text-slate-950">
+                      {resumeName || "No resume selected"}
+                    </p>
                     <p className="mt-1 text-sm text-slate-500">
-                      Mock upload. PDF and DOCX support will connect later.
+                      Upload a TXT, PDF, or DOCX resume. Text is extracted in this
+                      browser before analysis.
+                    </p>
+                    <p
+                      className={`mt-2 text-sm font-medium ${
+                        resumeStatus === "ready"
+                          ? "text-teal-700"
+                          : resumeStatus === "error"
+                            ? "text-amber-700"
+                            : "text-slate-500"
+                      }`}
+                    >
+                      {resumeStatus === "extracting"
+                        ? "Extracting resume text..."
+                        : resumeStatus === "ready"
+                          ? `Ready: ${resumeText.length.toLocaleString()} characters extracted.`
+                          : resumeStatus === "error"
+                            ? resumeError
+                            : "Choose a file to begin."}
                     </p>
                   </div>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() =>
-                      setResumeName(
-                        resumeName.includes("Arel")
-                          ? "Frontend_Resume_Targeted.docx"
-                          : "Arel_Gabay_Resume.pdf",
-                      )
-                    }
-                  >
-                    Swap file
-                  </Button>
+                  <label className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50">
+                    Choose file
+                    <input
+                      type="file"
+                      accept=".txt,.pdf,.docx,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      className="sr-only"
+                      onChange={(event) =>
+                        void handleResumeFileChange(event.target.files?.[0])
+                      }
+                    />
+                  </label>
                 </div>
               </div>
-            </label>
+            </div>
 
             <label className="block">
               <span className="text-sm font-semibold text-slate-800">
@@ -172,7 +245,11 @@ export default function DashboardPage() {
                   </p>
                 ) : null}
               </div>
-              <Button type="button" onClick={handleAnalyze} disabled={isAnalyzing}>
+              <Button
+                type="button"
+                onClick={handleAnalyze}
+                disabled={isAnalyzing || resumeStatus === "extracting"}
+              >
                 {isAnalyzing ? "Analyzing..." : "Analyze resume"}
               </Button>
             </div>

@@ -27,7 +27,7 @@ paste a job description, and review a clear application strategy.
 ## MVP status
 
 - Landing page with product positioning and sample analysis preview
-- Dashboard mock workflow for resume upload, role/company details, and job description input
+- Dashboard workflow for TXT/PDF/DOCX resume upload, browser-side text extraction, role/company details, and job description input
 - Analysis results with ATS score, missing keywords, matched keywords, resume suggestions, AI rewrite examples, and cover letter preview
 - Copyable mock cover letter output
 - Local FastAPI mock endpoint for full-stack demo development
@@ -137,7 +137,8 @@ npm run dev
 
 With `NEXT_PUBLIC_API_URL=http://localhost:8000`, the dashboard submit flow calls
 FastAPI, stores the API mock result in `sessionStorage`, and routes to
-`/analysis?source=api`.
+`/analysis?source=api`. Resume text is extracted in the browser and sent as
+`resume_text`; the mock API does not store it.
 
 ## Deployment
 
@@ -163,10 +164,9 @@ Backend deployment:
 
 ## Future roadmap
 
-1. Add resume text extraction for PDF/DOCX uploads.
-2. Integrate OpenAI for scoring, keyword extraction, rewrites, and cover letters.
-3. Add PostgreSQL persistence for saved analyses.
-4. Add authentication only after the core workflow is useful.
+1. Integrate OpenAI for scoring, keyword extraction, rewrites, and cover letters.
+2. Add PostgreSQL persistence for saved analyses.
+3. Add authentication only after the core workflow is useful.
 
 ## Notes
 

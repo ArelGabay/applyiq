@@ -40,6 +40,7 @@ Example request:
   "role": "Senior Frontend Engineer",
   "company": "Acme Corp",
   "resume_name": "Arel_Gabay_Resume.pdf",
+  "resume_text": "Extracted resume text...",
   "job_description": "Job description text..."
 }
 ```

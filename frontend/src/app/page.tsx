@@ -1,69 +1,174 @@
+import Image from "next/image";
 import { LinkButton } from "@/components/Button";
+import { Card, SectionHeader } from "@/components/Card";
+import { defaultAnalysis } from "@/lib/mockAnalysis";
 
 const features = [
   {
-    title: "ATS Score",
-    description: "See how well your resume matches the job description at a glance.",
+    title: "ATS match score",
+    description:
+      "Show recruiters' likely match signals with a clear score and focused recommendations.",
   },
   {
-    title: "Missing Keywords",
-    description: "Identify critical skills and terms recruiters and ATS systems look for.",
+    title: "Keyword gap analysis",
+    description:
+      "Compare a resume against the job description and surface missing terms that matter.",
   },
   {
-    title: "AI Rewrites",
-    description: "Get tailored suggestions to strengthen bullet points and summaries.",
+    title: "Rewrite-ready feedback",
+    description:
+      "Turn vague resume bullets into stronger, role-specific positioning with mock AI output.",
   },
+];
+
+const workflow = [
+  "Upload resume",
+  "Paste job description",
+  "Review tailored analysis",
 ];
 
 export default function LandingPage() {
   return (
     <>
-      <section className="relative overflow-hidden border-b border-slate-200 bg-white">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-50 via-white to-white" />
-        <div className="relative mx-auto max-w-6xl px-6 py-24 sm:py-32">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="mb-4 inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
-              AI-powered resume optimization
+      <section className="border-b border-slate-200 bg-white">
+        <div className="mx-auto grid max-w-6xl gap-12 px-6 py-16 lg:grid-cols-[1fr_0.9fr] lg:items-center lg:py-20">
+          <div>
+            <p className="mb-4 inline-flex items-center rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-800">
+              Portfolio-ready ATS optimization demo
             </p>
-            <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-              Land more interviews with an ATS-ready resume
+            <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
+              Turn any resume into a focused job application strategy.
             </h1>
-            <p className="mt-6 text-lg leading-8 text-slate-600">
-              Upload your resume and a job description. ApplyIQ scores your match,
-              surfaces missing keywords, and suggests improvements — built for your
-              portfolio and ready to scale.
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
+              ApplyIQ helps job seekers compare their resume against a job
+              description, spot missing keywords, preview stronger bullet rewrites,
+              and generate a tailored cover letter using mock AI data.
             </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <LinkButton href="/dashboard">Start optimizing</LinkButton>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <LinkButton href="/dashboard">Analyze a resume</LinkButton>
               <LinkButton href="/analysis" variant="secondary">
-                View sample analysis
+                View sample results
               </LinkButton>
             </div>
+            <div className="mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-slate-200 pt-6">
+              {[
+                ["82%", "sample score"],
+                ["5", "missing keywords"],
+                ["2", "AI rewrites"],
+              ].map(([value, label]) => (
+                <div key={label}>
+                  <p className="text-2xl font-bold text-slate-950">{value}</p>
+                  <p className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+                    {label}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
+
+          <Card className="p-5">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+              <div>
+                <p className="text-sm font-semibold text-slate-950">
+                  {defaultAnalysis.role}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {defaultAnalysis.company} analysis preview
+                </p>
+              </div>
+              <span className="rounded-full bg-teal-50 px-3 py-1 text-sm font-bold text-teal-700">
+                {defaultAnalysis.score}%
+              </span>
+            </div>
+            <div className="mt-5 grid gap-4">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <Image src="/file.svg" alt="" width={18} height={18} />
+                  <p className="text-sm font-semibold text-slate-800">
+                    Resume signal summary
+                  </p>
+                </div>
+                <p className="text-sm leading-6 text-slate-600">
+                  {defaultAnalysis.summary}
+                </p>
+              </div>
+              <div>
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="font-medium text-slate-700">ATS alignment</span>
+                  <span className="font-semibold text-slate-950">
+                    {defaultAnalysis.score} / 100
+                  </span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-full w-[82%] rounded-full bg-teal-600" />
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
+                    Missing
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-amber-950">
+                    GraphQL, CI/CD, AWS
+                  </p>
+                </div>
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
+                    Matched
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-emerald-950">
+                    React, TypeScript, Next.js
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="mb-12 text-center">
-          <h2 className="text-2xl font-semibold text-slate-900">
-            Everything you need to stand out
-          </h2>
-          <p className="mt-2 text-slate-600">
-            A focused toolkit for job seekers — no clutter, no overengineering.
-          </p>
-        </div>
-        <div className="grid gap-6 sm:grid-cols-3">
-          {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <h3 className="font-semibold text-slate-900">{feature.title}</h3>
+      <section className="mx-auto max-w-6xl px-6 py-16">
+        <SectionHeader
+          eyebrow="How it works"
+          title="A focused workflow for better applications"
+          description="The MVP is intentionally simple: enough product depth to feel real, with mock data that keeps the demo fast and reliable."
+          className="mb-10"
+        />
+        <div className="grid gap-4 md:grid-cols-3">
+          {workflow.map((step, index) => (
+            <Card key={step} className="p-6">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950 text-sm font-bold text-white">
+                {index + 1}
+              </span>
+              <h3 className="mt-5 font-semibold text-slate-950">{step}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                {feature.description}
+                {index === 0
+                  ? "Simulate a resume upload with a polished file picker."
+                  : index === 1
+                    ? "Paste the job description and target role to guide the mock analysis."
+                    : "Review score, keywords, rewrite examples, and a tailored cover letter."}
               </p>
-            </div>
+            </Card>
           ))}
+        </div>
+      </section>
+
+      <section className="border-t border-slate-200 bg-white">
+        <div className="mx-auto max-w-6xl px-6 py-16">
+          <SectionHeader
+            eyebrow="MVP features"
+            title="Built to show the product, not just describe it"
+            className="mb-10"
+          />
+          <div className="grid gap-6 md:grid-cols-3">
+            {features.map((feature) => (
+              <Card key={feature.title} className="p-6">
+                <h3 className="font-semibold text-slate-950">{feature.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  {feature.description}
+                </p>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
     </>

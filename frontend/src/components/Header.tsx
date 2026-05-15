@@ -2,15 +2,15 @@ import Link from "next/link";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/analysis", label: "Analysis" },
+  { href: "/analysis", label: "Sample analysis" },
 ];
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2 font-semibold text-slate-900">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 text-sm font-bold text-white">
             A
           </span>
           ApplyIQ
@@ -20,7 +20,7 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-slate-600 transition-colors hover:text-indigo-600"
+              className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
             >
               {link.label}
             </Link>
@@ -28,9 +28,9 @@ export function Header() {
         </nav>
         <Link
           href="/dashboard"
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+          className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-teal-700"
         >
-          Get started
+          Analyze resume
         </Link>
       </div>
     </header>

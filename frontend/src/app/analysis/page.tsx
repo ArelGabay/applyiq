@@ -1,80 +1,162 @@
 import { LinkButton } from "@/components/Button";
+import { Card } from "@/components/Card";
+import { CopyButton } from "@/components/CopyButton";
+import { findAnalysis } from "@/lib/mockAnalysis";
 
-const missingKeywords = ["TypeScript", "React", "CI/CD", "GraphQL", "AWS"];
-const suggestions = [
-  "Quantify impact in your most recent role (e.g. reduced load time by 40%).",
-  "Add React and TypeScript to your skills section — both appear in the job description.",
-  "Mirror the job title phrasing in your summary for stronger ATS alignment.",
-];
+type AnalysisPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
 
-export default function AnalysisPage() {
+const keywordTone = {
+  skill: "border-blue-200 bg-blue-50 text-blue-800",
+  tool: "border-violet-200 bg-violet-50 text-violet-800",
+  impact: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  domain: "border-amber-200 bg-amber-50 text-amber-800",
+};
+
+export default async function AnalysisPage({ searchParams }: AnalysisPageProps) {
+  const params = await searchParams;
+  const analysis = findAnalysis(params?.id);
+  const role = typeof params?.role === "string" ? params.role : analysis.role;
+  const company =
+    typeof params?.company === "string" ? params.company : analysis.company;
+  const resume =
+    typeof params?.resume === "string" ? params.resume : analysis.resumeFile;
+
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12">
-      <div className="mb-10">
-        <p className="text-sm font-medium text-indigo-600">Analysis results</p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900">
-          Senior Frontend Engineer — Acme Corp
-        </h1>
-        <p className="mt-1 text-slate-600">Sample analysis using mock data.</p>
+    <div className="mx-auto max-w-6xl px-6 py-10">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
+            Analysis results
+          </p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
+            {role} at {company}
+          </h1>
+          <p className="mt-2 text-sm text-slate-600">
+            Mock analysis for {resume}. Results are generated from local sample data.
+          </p>
+        </div>
+        <LinkButton href="/dashboard" variant="secondary">
+          Start new analysis
+        </LinkButton>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-8 lg:col-span-1">
-          <p className="text-sm font-medium text-slate-600">ATS Match Score</p>
-          <p className="mt-2 text-5xl font-bold text-indigo-600">78%</p>
-          <p className="mt-2 text-sm text-slate-600">
-            Good match. Address missing keywords to improve your score.
-          </p>
-          <div className="mt-6 h-2 overflow-hidden rounded-full bg-slate-100">
-            <div className="h-full w-[78%] rounded-full bg-indigo-600" />
+      <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
+        <Card className="p-6">
+          <p className="text-sm font-semibold text-slate-600">ATS match score</p>
+          <div className="mt-4 flex items-end gap-2">
+            <p className="text-6xl font-bold text-slate-950">{analysis.score}</p>
+            <p className="pb-2 text-xl font-bold text-slate-500">/100</p>
           </div>
-        </div>
-
-        <div className="rounded-xl border border-slate-200 bg-white p-6 lg:col-span-2">
-          <h2 className="font-semibold text-slate-900">Missing keywords</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Terms from the job description not found in your resume.
+          <div className="mt-6 h-3 overflow-hidden rounded-full bg-slate-100">
+            <div
+              className="h-full rounded-full bg-teal-600"
+              style={{ width: `${analysis.score}%` }}
+            />
+          </div>
+          <p className="mt-5 text-sm leading-6 text-slate-600">
+            {analysis.summary}
           </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {missingKeywords.map((keyword) => (
-              <span
-                key={keyword}
-                className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-sm font-medium text-amber-800"
+        </Card>
+
+        <Card className="p-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <h2 className="font-semibold text-slate-950">Missing keywords</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Add these naturally where they match your experience.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {analysis.missingKeywords.map((keyword) => (
+                  <span
+                    key={keyword.label}
+                    className={`rounded-full border px-3 py-1 text-sm font-semibold ${keywordTone[keyword.category]}`}
+                  >
+                    {keyword.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h2 className="font-semibold text-slate-950">Matched keywords</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                These terms already strengthen your alignment.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {analysis.matchedKeywords.map((keyword) => (
+                  <span
+                    key={keyword.label}
+                    className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800"
+                  >
+                    {keyword.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <Card className="p-6">
+          <h2 className="font-semibold text-slate-950">Resume suggestions</h2>
+          <ul className="mt-4 space-y-3">
+            {analysis.suggestions.map((suggestion) => (
+              <li
+                key={suggestion}
+                className="flex gap-3 text-sm leading-6 text-slate-600"
               >
-                {keyword}
-              </span>
+                <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-teal-600" />
+                {suggestion}
+              </li>
+            ))}
+          </ul>
+        </Card>
+
+        <Card className="p-6">
+          <h2 className="font-semibold text-slate-950">AI rewrite examples</h2>
+          <div className="mt-4 space-y-4">
+            {analysis.rewrites.map((rewrite) => (
+              <div key={rewrite.before} className="rounded-lg border border-slate-200">
+                <div className="border-b border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Before
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {rewrite.before}
+                  </p>
+                </div>
+                <div className="p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">
+                    After
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-800">
+                    {rewrite.after}
+                  </p>
+                </div>
+              </div>
             ))}
           </div>
+        </Card>
+      </div>
+
+      <Card className="mt-6 p-6">
+        <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-semibold text-slate-950">
+              Tailored cover letter preview
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Static mock output for the portfolio demo.
+            </p>
+          </div>
+          <CopyButton text={analysis.coverLetter} />
         </div>
-      </div>
-
-      <section className="mt-6 rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="font-semibold text-slate-900">Resume suggestions</h2>
-        <ul className="mt-4 space-y-3">
-          {suggestions.map((suggestion) => (
-            <li
-              key={suggestion}
-              className="flex gap-3 text-sm leading-6 text-slate-600"
-            >
-              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-600" />
-              {suggestion}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <div className="mt-8 flex gap-4">
-        <LinkButton href="/dashboard" variant="secondary">
-          Back to dashboard
-        </LinkButton>
-        <button
-          type="button"
-          disabled
-          className="rounded-lg border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-medium text-slate-400"
-        >
-          AI rewrite (coming soon)
-        </button>
-      </div>
+        <pre className="mt-5 whitespace-pre-wrap font-sans text-sm leading-7 text-slate-700">
+          {analysis.coverLetter}
+        </pre>
+      </Card>
     </div>
   );
 }

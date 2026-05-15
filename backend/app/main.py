@@ -23,6 +23,7 @@ class AnalysisRequest(BaseModel):
     role: str = "Senior Frontend Engineer"
     company: str = "Acme Corp"
     resume_name: str = "Resume.pdf"
+    resume_text: str | None = None
 
 
 @app.get("/health")
@@ -33,6 +34,7 @@ def health() -> dict[str, str]:
 @app.post("/analysis/mock")
 def mock_analysis(request: AnalysisRequest) -> dict[str, object]:
     normalized_description = request.job_description.lower()
+    has_resume_text = bool(request.resume_text and request.resume_text.strip())
     is_full_stack = "python" in normalized_description or "backend" in normalized_description
     score = 76 if is_full_stack else 82
     missing_keywords = (
@@ -78,7 +80,12 @@ def mock_analysis(request: AnalysisRequest) -> dict[str, object]:
         "summary": (
             f"{request.role} at {request.company} is a strong mock match. "
             "The API response highlights role-specific keyword gaps and gives "
-            "a recruiter-friendly direction for tightening the resume."
+            "a recruiter-friendly direction for tightening the resume. "
+            + (
+                "Extracted resume text was received for this mock analysis."
+                if has_resume_text
+                else "No extracted resume text was provided, so sample signals were used."
+            )
         ),
         "missingKeywords": missing_keywords,
         "matchedKeywords": matched_keywords,

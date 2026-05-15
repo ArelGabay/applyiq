@@ -1,16 +1,39 @@
 # ApplyIQ
 
-ApplyIQ is a portfolio-ready AI job application assistant. The MVP uses polished
+AI-powered ATS resume optimization demo built with Next.js, TypeScript,
+Tailwind CSS, and a FastAPI placeholder backend.
+
+> Live demo: <https://applyiq-arel.vercel.app>
+
+ApplyIQ is a portfolio-ready job application assistant. The MVP uses polished
 mock data to demonstrate how a user could upload a resume, compare it with a job
 description, and receive ATS-focused guidance.
 
-## Current MVP
+## MVP status
 
 - Landing page with product positioning and sample analysis preview
 - Dashboard mock workflow for resume upload, role/company details, and job description input
-- Analysis results with ATS score, missing keywords, matched keywords, resume suggestions, AI rewrite examples, and a cover letter preview
+- Analysis results with ATS score, missing keywords, matched keywords, resume suggestions, AI rewrite examples, and cover letter preview
 - Copyable mock cover letter output
 - Minimal FastAPI placeholder for future API work
+
+## Screenshots
+
+Screenshots to add next:
+
+- Landing page
+- Dashboard workflow
+- Analysis results
+
+## Tech stack
+
+| Area      | Tech                                      |
+| --------- | ----------------------------------------- |
+| Frontend  | Next.js, TypeScript, Tailwind CSS         |
+| Backend   | FastAPI, Python placeholder               |
+| Data      | Local mock analysis data                  |
+| AI        | Mock AI output first, OpenAI planned later |
+| Database  | PostgreSQL planned later                  |
 
 ## Project structure
 
@@ -69,7 +92,24 @@ Routes:
 - `GET /health`
 - `POST /analysis/mock`
 
-## Roadmap
+## Deployment
+
+The current production target is the Next.js app in `frontend/`.
+
+Recommended Vercel settings:
+
+- Framework: Next.js
+- Root directory: `frontend`
+- Install command: `npm install`
+- Build command: `npm run build`
+- Node version: 20.x
+- Environment variables: none required for the mock MVP
+
+Production deployment:
+
+- <https://applyiq-arel.vercel.app>
+
+## Future roadmap
 
 1. Replace mock analysis data with a real FastAPI endpoint.
 2. Add resume text extraction for PDF/DOCX uploads.

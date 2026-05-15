@@ -4,9 +4,16 @@ import { Header } from "@/components/Header";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ApplyIQ — AI Job Application Assistant",
+  title: "ApplyIQ — ATS Resume Optimization Demo",
   description:
-    "Optimize your resume for ATS, discover missing keywords, and land more interviews.",
+    "AI-powered ATS resume optimization demo with resume scoring, keyword gaps, rewrite examples, and tailored cover letter output.",
+  applicationName: "ApplyIQ",
+  openGraph: {
+    title: "ApplyIQ — ATS Resume Optimization Demo",
+    description:
+      "Upload a resume, compare it with a job description, and preview ATS-focused recommendations using polished mock AI data.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

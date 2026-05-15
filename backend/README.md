@@ -11,6 +11,23 @@ pip install fastapi uvicorn
 uvicorn app.main:app --reload
 ```
 
+## Deploy
+
+This backend can deploy as a standalone Vercel Python/FastAPI project from the
+`backend/` directory.
+
+Recommended Vercel settings:
+
+- Project name: `applyiq-api`
+- Root directory: `backend`
+- Python version: `3.13`
+- Entry point: `app.main:app`
+- Environment variables: none required for the mock API
+
+Production API:
+
+- <https://applyiq-api-arel.vercel.app>
+
 ## Routes
 
 - `GET /health` returns API health.

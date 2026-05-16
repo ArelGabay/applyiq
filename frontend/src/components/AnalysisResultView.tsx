@@ -4,12 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { LinkButton } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { CopyButton } from "@/components/CopyButton";
-import {
-  API_ANALYSIS_STORAGE_KEY,
-  type AnalysisResult,
-  defaultAnalysis,
-  findAnalysis,
-} from "@/lib/mockAnalysis";
+import { resolveAnalysis } from "@/lib/analysisSession";
 
 const keywordTone = {
   skill: "border-blue-200 bg-blue-50 text-blue-800",
@@ -18,28 +13,13 @@ const keywordTone = {
   domain: "border-amber-200 bg-amber-50 text-amber-800",
 };
 
-function readStoredAnalysis(source: string | null) {
-  if ((source !== "api" && source !== "ai") || typeof window === "undefined") {
-    return null;
-  }
-
-  try {
-    const storedValue = window.sessionStorage.getItem(API_ANALYSIS_STORAGE_KEY);
-    return storedValue ? (JSON.parse(storedValue) as AnalysisResult) : null;
-  } catch {
-    return null;
-  }
-}
-
 export function AnalysisResultView() {
   const searchParams = useSearchParams();
   const source = searchParams.get("source");
-  const localAnalysis = findAnalysis(searchParams.get("id") ?? undefined);
-  const storedAnalysis = readStoredAnalysis(source);
-  const analysis =
-    source === "api" || source === "ai" ? storedAnalysis ?? defaultAnalysis : localAnalysis;
-  const isAiResult = source === "ai" && Boolean(storedAnalysis);
-  const isApiResult = source === "api" && Boolean(storedAnalysis);
+  const { analysis, isAiResult, isApiResult } = resolveAnalysis(
+    source,
+    searchParams.get("id") ?? undefined,
+  );
   const role = searchParams.get("role") ?? analysis.role;
   const company = searchParams.get("company") ?? analysis.company;
   const resume = searchParams.get("resume") ?? analysis.resumeFile;

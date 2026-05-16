@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, LinkButton } from "@/components/Button";
@@ -14,6 +14,11 @@ import {
 } from "@/lib/dashboardModel";
 import { mockAnalyses } from "@/lib/mockAnalysis";
 import { extractResumeText } from "@/lib/resumeText";
+import {
+  clearSavedAnalyses,
+  readSavedAnalyses,
+  type SavedAnalysisRecord,
+} from "@/lib/savedAnalyses";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -28,8 +33,22 @@ export default function DashboardPage() {
   const [jobDescription, setJobDescription] = useState(sampleJobDescription);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [savedAnalyses, setSavedAnalyses] = useState<SavedAnalysisRecord[]>([]);
 
   const selectedAnalysisId = useMemo(() => selectAnalysisId(role), [role]);
+
+  useEffect(() => {
+    const timerId = window.setTimeout(() => {
+      setSavedAnalyses(readSavedAnalyses());
+    }, 0);
+
+    return () => window.clearTimeout(timerId);
+  }, []);
+
+  function handleClearSavedAnalyses() {
+    clearSavedAnalyses();
+    setSavedAnalyses([]);
+  }
 
   async function handleAnalyze() {
     setApiError("");
@@ -293,28 +312,65 @@ export default function DashboardPage() {
           </Card>
 
           <Card className="p-6">
-            <h2 className="font-semibold text-slate-950">Recent analyses</h2>
-            <div className="mt-4 space-y-3">
-              {mockAnalyses.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/analysis?id=${item.id}`}
-                  className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:bg-slate-50"
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-semibold text-slate-950">Recent analyses</h2>
+              {savedAnalyses.length ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="min-h-8 px-3 py-1.5 text-xs"
+                  onClick={handleClearSavedAnalyses}
                 >
-                  <div>
-                    <p className="text-sm font-semibold text-slate-950">
-                      {item.role}
-                    </p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      {item.company} · {item.analyzedAt}
-                    </p>
-                  </div>
-                  <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700">
-                    {item.score}%
-                  </span>
-                </Link>
-              ))}
+                  Clear
+                </Button>
+              ) : null}
             </div>
+            {savedAnalyses.length ? (
+              <div className="mt-4 space-y-3">
+                {savedAnalyses.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/analysis?saved=${item.id}`}
+                    className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:bg-slate-50"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-slate-950">
+                        {item.role}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {item.company} · {item.sourceLabel} ·{" "}
+                        {new Date(item.savedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700">
+                      {item.score}%
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {mockAnalyses.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/analysis?id=${item.id}`}
+                    className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:bg-slate-50"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-slate-950">
+                        {item.role}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {item.company} · Sample · {item.analyzedAt}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700">
+                      {item.score}%
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
           </Card>
         </div>
       </div>

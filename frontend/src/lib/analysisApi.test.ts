@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { submitDashboardAnalysis, type DashboardAnalysisRequest } from "./analysisApi";
 import { API_ANALYSIS_STORAGE_KEY, type AnalysisResult } from "./mockAnalysis";
+import { SAVED_ANALYSES_STORAGE_KEY } from "./savedAnalyses";
 
 function analysis(overrides: Partial<AnalysisResult> = {}): AnalysisResult {
   return {
@@ -59,7 +60,12 @@ function createSessionStorage() {
 
 describe("submitDashboardAnalysis", () => {
   beforeEach(() => {
-    vi.stubGlobal("sessionStorage", createSessionStorage());
+    vi.stubGlobal("window", {
+      localStorage: createSessionStorage(),
+      sessionStorage: createSessionStorage(),
+    });
+    vi.stubGlobal("localStorage", window.localStorage);
+    vi.stubGlobal("sessionStorage", window.sessionStorage);
   });
 
   afterEach(() => {
@@ -90,6 +96,10 @@ describe("submitDashboardAnalysis", () => {
       API_ANALYSIS_STORAGE_KEY,
       JSON.stringify(analysis({ id: "ai-analysis" })),
     );
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      SAVED_ANALYSES_STORAGE_KEY,
+      expect.stringContaining("ai-analysis"),
+    );
   });
 
   it("falls back to API mock results when AI fails", async () => {
@@ -111,6 +121,10 @@ describe("submitDashboardAnalysis", () => {
       "https://api.example.com/analysis/mock",
       expect.objectContaining({ method: "POST" }),
     );
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      SAVED_ANALYSES_STORAGE_KEY,
+      expect.stringContaining("api-mock-analysis"),
+    );
   });
 
   it("falls back to local sample analysis when both API endpoints fail", async () => {
@@ -125,5 +139,9 @@ describe("submitDashboardAnalysis", () => {
       apiError:
         "The API is not reachable, so ApplyIQ used the built-in mock fallback.",
     });
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      SAVED_ANALYSES_STORAGE_KEY,
+      expect.stringContaining("Local mock result"),
+    );
   });
 });

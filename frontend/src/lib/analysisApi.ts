@@ -1,4 +1,9 @@
-import { API_ANALYSIS_STORAGE_KEY, type AnalysisResult } from "@/lib/mockAnalysis";
+import {
+  API_ANALYSIS_STORAGE_KEY,
+  findAnalysis,
+  type AnalysisResult,
+} from "@/lib/mockAnalysis";
+import { saveAnalysis } from "@/lib/savedAnalyses";
 
 type AnalysisEndpoint = "ai" | "mock";
 
@@ -56,10 +61,22 @@ function buildLocalAnalysisRoute(input: DashboardAnalysisRequest) {
   return `/analysis?${params.toString()}`;
 }
 
+function saveLocalAnalysis(input: DashboardAnalysisRequest) {
+  const analysis = findAnalysis(input.selectedAnalysisId);
+  saveAnalysis({
+    analysis,
+    sourceLabel: "Local mock result",
+    role: input.role,
+    company: input.company,
+    resumeFile: input.resumeName,
+  });
+}
+
 export async function submitDashboardAnalysis(
   input: DashboardAnalysisRequest,
 ): Promise<DashboardAnalysisResult> {
   if (!input.apiUrl) {
+    saveLocalAnalysis(input);
     return { route: buildLocalAnalysisRoute(input) };
   }
 
@@ -74,17 +91,20 @@ export async function submitDashboardAnalysis(
   try {
     const analysis = await requestAnalysis(input.apiUrl, "ai", payload);
     sessionStorage.setItem(API_ANALYSIS_STORAGE_KEY, JSON.stringify(analysis));
+    saveAnalysis({ analysis, sourceLabel: "AI result" });
     return { route: "/analysis?source=ai" };
   } catch {
     try {
       const analysis = await requestAnalysis(input.apiUrl, "mock", payload);
       sessionStorage.setItem(API_ANALYSIS_STORAGE_KEY, JSON.stringify(analysis));
+      saveAnalysis({ analysis, sourceLabel: "API mock result" });
       return {
         route: "/analysis?source=api",
         apiError:
           "OpenAI analysis is unavailable, so ApplyIQ used the deterministic API mock fallback.",
       };
     } catch {
+      saveLocalAnalysis(input);
       return {
         route: buildLocalAnalysisRoute(input),
         apiError:

@@ -4,6 +4,7 @@ import {
   findAnalysis,
   type AnalysisResult,
 } from "@/lib/mockAnalysis";
+import { findSavedAnalysis } from "@/lib/savedAnalyses";
 
 export function readStoredAnalysis(source: string | null) {
   if ((source !== "api" && source !== "ai") || typeof window === "undefined") {
@@ -18,7 +19,22 @@ export function readStoredAnalysis(source: string | null) {
   }
 }
 
-export function resolveAnalysis(source: string | null, id?: string | string[]) {
+export function resolveAnalysis(
+  source: string | null,
+  id?: string | string[],
+  savedId?: string | null,
+) {
+  const savedAnalysis = findSavedAnalysis(savedId);
+
+  if (savedAnalysis) {
+    return {
+      analysis: savedAnalysis.analysis,
+      isAiResult: savedAnalysis.sourceLabel === "AI result",
+      isApiResult: savedAnalysis.sourceLabel === "API mock result",
+      sourceLabel: savedAnalysis.sourceLabel,
+    };
+  }
+
   const storedAnalysis = readStoredAnalysis(source);
   const analysis =
     source === "api" || source === "ai"
@@ -29,5 +45,11 @@ export function resolveAnalysis(source: string | null, id?: string | string[]) {
     analysis,
     isAiResult: source === "ai" && Boolean(storedAnalysis),
     isApiResult: source === "api" && Boolean(storedAnalysis),
+    sourceLabel:
+      source === "ai" && Boolean(storedAnalysis)
+        ? "AI result"
+        : source === "api" && Boolean(storedAnalysis)
+          ? "API mock result"
+          : "Local mock result",
   };
 }

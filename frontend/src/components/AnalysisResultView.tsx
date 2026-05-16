@@ -16,18 +16,14 @@ const keywordTone = {
 export function AnalysisResultView() {
   const searchParams = useSearchParams();
   const source = searchParams.get("source");
-  const { analysis, isAiResult, isApiResult } = resolveAnalysis(
+  const { analysis, isAiResult, isApiResult, sourceLabel } = resolveAnalysis(
     source,
     searchParams.get("id") ?? undefined,
+    searchParams.get("saved"),
   );
   const role = searchParams.get("role") ?? analysis.role;
   const company = searchParams.get("company") ?? analysis.company;
   const resume = searchParams.get("resume") ?? analysis.resumeFile;
-  const sourceLabel = isAiResult
-    ? "AI result"
-    : isApiResult
-      ? "API mock result"
-      : "Local mock result";
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">

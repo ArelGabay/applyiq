@@ -1,13 +1,12 @@
 import Image from "next/image";
 import { LinkButton } from "@/components/Button";
 import { Card, SectionHeader } from "@/components/Card";
-import { defaultAnalysis } from "@/lib/mockAnalysis";
 
 const features = [
   {
     title: "ATS match score",
     description:
-      "Show recruiters' likely match signals with a clear score and focused recommendations.",
+      "Estimate role alignment with deterministic keyword coverage and focused recommendations.",
   },
   {
     title: "Keyword gap analysis",
@@ -17,7 +16,7 @@ const features = [
   {
     title: "Rewrite-ready feedback",
     description:
-      "Turn vague resume bullets into stronger, role-specific positioning with mock AI output.",
+      "Turn vague resume bullets into stronger, role-specific positioning with template-based output.",
   },
 ];
 
@@ -26,6 +25,14 @@ const workflow = [
   "Paste job description",
   "Review tailored analysis",
 ];
+
+const previewAnalysis = {
+  role: "Senior Frontend Engineer",
+  company: "Acme Corp",
+  score: 79,
+  summary:
+    "ApplyIQ found 4 of 8 target signals. The resume already reflects React, TypeScript, and Next.js. Tightening AWS, GraphQL, and CI/CD would make the application feel more tailored.",
+};
 
 export default function LandingPage() {
   return (
@@ -41,8 +48,9 @@ export default function LandingPage() {
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
               ApplyIQ helps job seekers compare their resume against a job
-              description, spot missing keywords, preview stronger bullet rewrites,
-              and generate a tailored cover letter using mock AI data.
+              description, spot missing keywords, preview stronger bullet
+              rewrites, and generate a tailored cover letter using deterministic
+              ATS-style analysis.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <LinkButton href="/dashboard">Analyze a resume</LinkButton>
@@ -52,9 +60,9 @@ export default function LandingPage() {
             </div>
             <div className="mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-slate-200 pt-6">
               {[
-                ["82%", "sample score"],
-                ["5", "missing keywords"],
-                ["2", "AI rewrites"],
+                ["79%", "API mock score"],
+                ["8", "target signals"],
+                ["3", "core gaps"],
               ].map(([value, label]) => (
                 <div key={label}>
                   <p className="text-2xl font-bold text-slate-950">{value}</p>
@@ -70,14 +78,14 @@ export default function LandingPage() {
             <div className="flex items-center justify-between border-b border-slate-200 pb-4">
               <div>
                 <p className="text-sm font-semibold text-slate-950">
-                  {defaultAnalysis.role}
+                  {previewAnalysis.role}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
-                  {defaultAnalysis.company} analysis preview
+                  {previewAnalysis.company} API mock preview
                 </p>
               </div>
               <span className="rounded-full bg-teal-50 px-3 py-1 text-sm font-bold text-teal-700">
-                {defaultAnalysis.score}%
+                {previewAnalysis.score}%
               </span>
             </div>
             <div className="mt-5 grid gap-4">
@@ -89,18 +97,20 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <p className="text-sm leading-6 text-slate-600">
-                  {defaultAnalysis.summary}
+                  {previewAnalysis.summary}
                 </p>
               </div>
               <div>
                 <div className="mb-2 flex items-center justify-between text-sm">
-                  <span className="font-medium text-slate-700">ATS alignment</span>
+                  <span className="font-medium text-slate-700">
+                    Deterministic alignment
+                  </span>
                   <span className="font-semibold text-slate-950">
-                    {defaultAnalysis.score} / 100
+                    {previewAnalysis.score} / 100
                   </span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                  <div className="h-full w-[82%] rounded-full bg-teal-600" />
+                  <div className="h-full w-[79%] rounded-full bg-teal-600" />
                 </div>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -130,7 +140,7 @@ export default function LandingPage() {
         <SectionHeader
           eyebrow="How it works"
           title="A focused workflow for better applications"
-          description="The MVP is intentionally simple: enough product depth to feel real, with mock data that keeps the demo fast and reliable."
+          description="The MVP is intentionally simple: enough product depth to feel real, with browser parsing and deterministic mock analysis that keep the demo fast and reliable."
           className="mb-10"
         />
         <div className="grid gap-4 md:grid-cols-3">
@@ -142,9 +152,9 @@ export default function LandingPage() {
               <h3 className="mt-5 font-semibold text-slate-950">{step}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 {index === 0
-                  ? "Simulate a resume upload with a polished file picker."
+                  ? "Upload a TXT, PDF, or DOCX resume and extract text in the browser."
                   : index === 1
-                    ? "Paste the job description and target role to guide the mock analysis."
+                    ? "Paste the job description and target role to guide deterministic keyword matching."
                     : "Review score, keywords, rewrite examples, and a tailored cover letter."}
               </p>
             </Card>

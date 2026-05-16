@@ -9,7 +9,8 @@
     "dev": "$NODE ./node_modules/next/dist/bin/next dev --webpack",
     "build": "$NODE ./node_modules/next/dist/bin/next build",
     "start": "$NODE ./node_modules/next/dist/bin/next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "$NODE ./node_modules/vitest/vitest.mjs run"
   },
   "dependencies": {
     "mammoth": "^1.12.0",
@@ -26,6 +27,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.6"
   }
 }

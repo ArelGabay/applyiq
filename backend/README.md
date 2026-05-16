@@ -13,6 +13,14 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+## Test
+
+```bash
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+python -m pytest
+```
+
 Optional OpenAI analysis:
 
 ```bash

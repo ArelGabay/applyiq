@@ -108,6 +108,15 @@ Open [http://localhost:3000](http://localhost:3000).
 If a Next.js command reports an old Node version, confirm `node -v` prints
 `v20.9.0` or newer after `nvm use`.
 
+### Test
+
+```bash
+cd frontend
+npm run lint
+npm run test
+npm run build
+```
+
 ### Pages
 
 | Route        | Description                                  |
@@ -127,6 +136,15 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
+```
+
+Run backend tests:
+
+```bash
+cd backend
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+python -m pytest
 ```
 
 Routes:

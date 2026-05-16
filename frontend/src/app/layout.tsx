@@ -6,12 +6,12 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ApplyIQ — ATS Resume Optimization Demo",
   description:
-    "AI-powered ATS resume optimization demo with resume scoring, keyword gaps, rewrite examples, and tailored cover letter output.",
+    "ATS resume optimization demo with browser resume parsing, deterministic keyword matching, rewrite examples, and tailored cover letter output.",
   applicationName: "ApplyIQ",
   openGraph: {
     title: "ApplyIQ — ATS Resume Optimization Demo",
     description:
-      "Upload a resume, compare it with a job description, and preview ATS-focused recommendations using polished mock AI data.",
+      "Upload a resume, compare it with a job description, and preview ATS-focused recommendations using deterministic mock analysis.",
     type: "website",
   },
 };

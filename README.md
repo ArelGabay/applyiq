@@ -3,11 +3,13 @@
 AI-powered ATS resume optimization demo built with Next.js, TypeScript,
 Tailwind CSS, and a FastAPI placeholder backend.
 
-> Live demo: <https://applyiq-arel.vercel.app>
+> Live demo: <https://applyiq-arel.vercel.app>  
+> Public API: <https://applyiq-api-arel.vercel.app/health>
 
 ApplyIQ is a portfolio-ready job application assistant. The MVP uses polished
-mock data to demonstrate how a user could upload a resume, compare it with a job
-description, and receive ATS-focused guidance.
+browser parsing and deterministic mock analysis to demonstrate how a user could
+upload a resume, compare it with a job description, and receive ATS-focused
+guidance.
 
 ## Why I built this
 
@@ -19,11 +21,19 @@ paste a job description, and review a clear application strategy.
 ## What this demonstrates
 
 - Production-style Next.js app structure with TypeScript and Tailwind CSS
-- A polished multi-page product flow with realistic mock AI output
+- A polished multi-page product flow with realistic deterministic output
 - ATS scoring, keyword gap analysis, resume rewrite examples, and cover letter preview
 - Deterministic keyword matching from uploaded resume text and job descriptions
 - Frontend-first MVP thinking with a documented FastAPI path for future backend work
 - Public deployment on Vercel with a portfolio-ready README
+
+## Demo walkthrough
+
+1. Open the live demo and choose **Analyze resume**.
+2. Upload a TXT, PDF, or DOCX resume; text is extracted in the browser.
+3. Paste a job description and confirm the target role/company.
+4. Submit the workflow to call the public FastAPI mock API.
+5. Review the ATS-style score, matched keywords, missing keywords, rewrite examples, and cover letter preview.
 
 ## MVP status
 
@@ -56,6 +66,14 @@ paste a job description, and review a clear application strategy.
 | Data      | Local samples plus deterministic API mock results |
 | AI        | Mock AI output first, OpenAI planned later |
 | Database  | PostgreSQL planned later                  |
+
+## Current architecture
+
+- The Next.js frontend handles the full portfolio demo flow and remains usable even if no backend URL is configured.
+- Resume text is extracted in the browser from TXT, PDF, and DOCX files; files are not uploaded or stored.
+- When `NEXT_PUBLIC_API_URL` is configured, the dashboard sends extracted text and job details to FastAPI.
+- The FastAPI mock API compares resume text against the job description using a fixed keyword bank and returns frontend-ready JSON.
+- The analysis page reads API results from `sessionStorage`; otherwise it falls back to local sample data.
 
 ## Project structure
 

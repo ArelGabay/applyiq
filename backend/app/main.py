@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.controllers import router
+from app.controllers.analysis_controller import router as analysis_router
+from app.controllers.health_controller import router as health_router
 
 
 def create_app() -> FastAPI:
@@ -17,7 +18,8 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.include_router(router)
+    app.include_router(health_router)
+    app.include_router(analysis_router)
     return app
 
 

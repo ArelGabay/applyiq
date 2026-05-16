@@ -1,20 +1,15 @@
 from fastapi import APIRouter, HTTPException
 
-from app.models import AnalysisRequest
-from app.services.mock_analysis import create_mock_analysis
-from app.services.openai_analysis import (
+from app.models.analysis_models import AnalysisRequest
+from app.services.analysis_service import (
     create_ai_analysis,
+    create_mock_analysis,
     has_openai_key,
     is_openai_enabled,
 )
 
 
 router = APIRouter()
-
-
-@router.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
 
 
 @router.post("/analysis/mock")

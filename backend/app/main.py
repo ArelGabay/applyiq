@@ -26,6 +26,50 @@ class AnalysisRequest(BaseModel):
     resume_text: str | None = None
 
 
+KEYWORD_BANK = [
+    {"label": "React", "category": "skill", "terms": ["react"]},
+    {"label": "TypeScript", "category": "skill", "terms": ["typescript", "type script"]},
+    {"label": "Python", "category": "skill", "terms": ["python"]},
+    {"label": "JavaScript", "category": "skill", "terms": ["javascript", "java script"]},
+    {"label": "HTML", "category": "skill", "terms": ["html"]},
+    {"label": "CSS", "category": "skill", "terms": ["css"]},
+    {"label": "Next.js", "category": "tool", "terms": ["next.js", "nextjs", "next js"]},
+    {"label": "FastAPI", "category": "tool", "terms": ["fastapi", "fast api"]},
+    {"label": "PostgreSQL", "category": "tool", "terms": ["postgresql", "postgres"]},
+    {"label": "Docker", "category": "tool", "terms": ["docker"]},
+    {"label": "AWS", "category": "tool", "terms": ["aws", "amazon web services"]},
+    {"label": "GraphQL", "category": "tool", "terms": ["graphql", "graph ql"]},
+    {"label": "CI/CD", "category": "tool", "terms": ["ci/cd", "cicd", "ci cd"]},
+    {"label": "Git", "category": "tool", "terms": ["git", "github"]},
+    {"label": "Accessibility", "category": "impact", "terms": ["accessibility", "a11y"]},
+    {"label": "Performance", "category": "impact", "terms": ["performance", "latency"]},
+    {"label": "Design systems", "category": "domain", "terms": ["design system", "design systems"]},
+    {"label": "REST APIs", "category": "domain", "terms": ["rest api", "rest apis", "restful"]},
+    {"label": "Testing", "category": "impact", "terms": ["testing", "tests", "jest", "pytest"]},
+    {
+        "label": "Component architecture",
+        "category": "domain",
+        "terms": ["component architecture", "components", "component library"],
+    },
+]
+
+
+def contains_any_term(text: str, terms: list[str]) -> bool:
+    return any(term in text for term in terms)
+
+
+def format_labels(keywords: list[dict[str, str]], fallback: str) -> str:
+    labels = [keyword["label"] for keyword in keywords[:3]]
+
+    if not labels:
+        return fallback
+
+    if len(labels) == 1:
+        return labels[0]
+
+    return f"{', '.join(labels[:-1])}, and {labels[-1]}"
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -34,41 +78,32 @@ def health() -> dict[str, str]:
 @app.post("/analysis/mock")
 def mock_analysis(request: AnalysisRequest) -> dict[str, object]:
     normalized_description = request.job_description.lower()
-    has_resume_text = bool(request.resume_text and request.resume_text.strip())
-    is_full_stack = "python" in normalized_description or "backend" in normalized_description
-    score = 76 if is_full_stack else 82
-    missing_keywords = (
-        [
-            {"label": "PostgreSQL", "category": "tool"},
-            {"label": "Docker", "category": "tool"},
-            {"label": "REST APIs", "category": "domain"},
-            {"label": "Cloud deployment", "category": "impact"},
-        ]
-        if is_full_stack
-        else [
-            {"label": "GraphQL", "category": "tool"},
-            {"label": "CI/CD", "category": "tool"},
-            {"label": "Accessibility", "category": "impact"},
-            {"label": "Design systems", "category": "domain"},
-            {"label": "AWS", "category": "tool"},
-        ]
-    )
-    matched_keywords = (
-        [
-            {"label": "React", "category": "skill"},
-            {"label": "TypeScript", "category": "skill"},
-            {"label": "Python", "category": "skill"},
-            {"label": "Testing", "category": "impact"},
-        ]
-        if is_full_stack
-        else [
-            {"label": "React", "category": "skill"},
-            {"label": "TypeScript", "category": "skill"},
-            {"label": "Next.js", "category": "tool"},
-            {"label": "Performance", "category": "impact"},
-            {"label": "Component architecture", "category": "domain"},
-        ]
-    )
+    normalized_resume = (request.resume_text or "").lower()
+    has_resume_text = bool(normalized_resume.strip())
+    relevant_keywords = [
+        keyword
+        for keyword in KEYWORD_BANK
+        if contains_any_term(normalized_description, keyword["terms"])
+    ]
+
+    if not relevant_keywords:
+        relevant_keywords = KEYWORD_BANK[:8]
+
+    matched_keywords = [
+        {"label": keyword["label"], "category": keyword["category"]}
+        for keyword in relevant_keywords
+        if has_resume_text and contains_any_term(normalized_resume, keyword["terms"])
+    ]
+    missing_keywords = [
+        {"label": keyword["label"], "category": keyword["category"]}
+        for keyword in relevant_keywords
+        if not has_resume_text or not contains_any_term(normalized_resume, keyword["terms"])
+    ]
+
+    coverage = len(matched_keywords) / len(relevant_keywords)
+    score = min(96, max(58, round(62 + coverage * 34)))
+    matched_label_text = format_labels(matched_keywords, "core role requirements")
+    missing_label_text = format_labels(missing_keywords, "a few job-specific keywords")
 
     return {
         "id": "api-mock-analysis",
@@ -78,48 +113,46 @@ def mock_analysis(request: AnalysisRequest) -> dict[str, object]:
         "analyzedAt": "Just now",
         "score": score,
         "summary": (
-            f"{request.role} at {request.company} is a strong mock match. "
-            "The API response highlights role-specific keyword gaps and gives "
-            "a recruiter-friendly direction for tightening the resume. "
-            + (
-                "Extracted resume text was received for this mock analysis."
-                if has_resume_text
-                else "No extracted resume text was provided, so sample signals were used."
-            )
+            f"ApplyIQ found {len(matched_keywords)} of {len(relevant_keywords)} target "
+            f"signals for the {request.role} role at {request.company}. "
+            f"The resume already reflects {matched_label_text}. "
+            f"Tightening {missing_label_text} would make the application feel more tailored."
         ),
         "missingKeywords": missing_keywords,
         "matchedKeywords": matched_keywords,
         "suggestions": [
-            "Mirror the exact role language from the job description in the resume summary.",
-            "Add measurable impact to the most relevant recent project bullet.",
-            "Bring missing keywords into experience bullets only where they match real work.",
-            "Make the skills section easier for ATS systems to scan.",
+            f"Add {missing_label_text} where it honestly matches your project experience.",
+            f"Keep {matched_label_text} visible in the summary, skills, and strongest project bullets.",
+            "Add one measurable impact point to the most relevant recent experience.",
+            "Use the target role title naturally near the top of the resume.",
         ],
         "rewrites": [
             {
-                "before": "Worked on application features for users.",
+                "before": "Worked on application features and improved the product.",
                 "after": (
-                    "Delivered user-facing product features aligned with "
-                    f"{request.role} requirements, improving clarity, maintainability, "
-                    "and release confidence."
+                    f"Delivered product features aligned with {request.role} requirements, "
+                    f"highlighting {matched_label_text} while improving usability, "
+                    "maintainability, and release confidence."
                 ),
             },
             {
-                "before": "Helped improve the resume project.",
+                "before": "Built technical projects using modern tools.",
                 "after": (
-                    "Built a full-stack mock analysis workflow with a Next.js frontend "
-                    "and FastAPI endpoint, creating a more credible product demo."
+                    f"Built portfolio-ready software that connects {matched_label_text} "
+                    f"to practical outcomes, with room to emphasize {missing_label_text} "
+                    "for this specific job description."
                 ),
             },
         ],
         "coverLetter": (
             f"Dear {request.company} hiring team,\n\n"
             f"I am excited to apply for the {request.role} role. My experience "
-            "building polished, practical software products aligns with the needs "
-            "outlined in your job description. I enjoy turning ambiguous requirements "
-            "into clean user flows, measurable improvements, and maintainable systems.\n\n"
-            "This mock ApplyIQ analysis highlights the strongest resume signals while "
-            "surfacing keyword gaps to address before applying. I would bring that same "
+            f"shows alignment with {matched_label_text}, which stood out as important "
+            "in your job description. I enjoy turning ambiguous requirements into "
+            "clean user flows, measurable improvements, and maintainable systems.\n\n"
+            f"Before applying, I would further tailor the resume around {missing_label_text} "
+            "so the strongest experience is easier for recruiters and ATS systems to find. "
+            "I would bring that same "
             f"focused, product-minded approach to {request.company}.\n\n"
             "Thank you for your consideration.\nArel Gabay"
         ),

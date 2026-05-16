@@ -11,6 +11,11 @@ import { extractResumeText } from "@/lib/resumeText";
 const sampleJobDescription =
   "We are looking for a Senior Frontend Engineer with strong React, TypeScript, Next.js, accessibility, performance, and design system experience. Familiarity with GraphQL, CI/CD, and AWS is a plus.";
 
+function getResumeFileType(fileName: string) {
+  const extension = fileName.split(".").pop()?.toUpperCase();
+  return extension ? `${extension} file` : "Resume file";
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [resumeName, setResumeName] = useState("");
@@ -218,6 +223,44 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+
+            {resumeStatus === "ready" ? (
+              <div className="rounded-lg border border-teal-200 bg-teal-50 p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-teal-950">
+                      Ready for mock analysis
+                    </p>
+                    <p className="mt-1 text-sm text-teal-800">
+                      ApplyIQ parsed this resume in your browser.
+                    </p>
+                  </div>
+                  <span className="w-fit rounded-full bg-white px-3 py-1 text-xs font-bold text-teal-700">
+                    Parsed
+                  </span>
+                </div>
+                <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
+                  <div>
+                    <dt className="font-semibold text-teal-950">Filename</dt>
+                    <dd className="mt-1 truncate text-teal-800">{resumeName}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold text-teal-950">File type</dt>
+                    <dd className="mt-1 text-teal-800">
+                      {getResumeFileType(resumeName)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold text-teal-950">
+                      Extracted text
+                    </dt>
+                    <dd className="mt-1 text-teal-800">
+                      {resumeText.length.toLocaleString()} characters
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            ) : null}
 
             <label className="block">
               <span className="text-sm font-semibold text-slate-800">

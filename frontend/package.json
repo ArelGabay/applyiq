@@ -10,7 +10,8 @@
     "build": "$NODE ./node_modules/next/dist/bin/next build",
     "start": "$NODE ./node_modules/next/dist/bin/next start",
     "lint": "eslint",
-    "test": "$NODE ./node_modules/vitest/vitest.mjs run"
+    "test": "$NODE ./node_modules/vitest/vitest.mjs run",
+    "test:e2e": "NODE=${NODE:-node}; $NODE ./node_modules/@playwright/test/cli.js test"
   },
   "dependencies": {
     "mammoth": "^1.12.0",
@@ -20,6 +21,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

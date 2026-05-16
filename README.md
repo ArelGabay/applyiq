@@ -130,6 +130,7 @@ If a Next.js command reports an old Node version, confirm `node -v` prints
 cd frontend
 npm run lint
 npm run test
+npm run test:e2e
 npm run build
 ```
 

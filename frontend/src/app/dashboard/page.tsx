@@ -5,16 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, LinkButton } from "@/components/Button";
 import { Card, SectionHeader } from "@/components/Card";
-import { API_ANALYSIS_STORAGE_KEY, mockAnalyses } from "@/lib/mockAnalysis";
+import { submitDashboardAnalysis } from "@/lib/analysisApi";
+import {
+  cleanDashboardInput,
+  getResumeFileType,
+  sampleJobDescription,
+  selectAnalysisId,
+} from "@/lib/dashboardModel";
+import { mockAnalyses } from "@/lib/mockAnalysis";
 import { extractResumeText } from "@/lib/resumeText";
-
-const sampleJobDescription =
-  "We are looking for a Senior Frontend Engineer with strong React, TypeScript, Next.js, accessibility, performance, and design system experience. Familiarity with GraphQL, CI/CD, and AWS is a plus.";
-
-function getResumeFileType(fileName: string) {
-  const extension = fileName.split(".").pop()?.toUpperCase();
-  return extension ? `${extension} file` : "Resume file";
-}
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -30,103 +29,50 @@ export default function DashboardPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [apiError, setApiError] = useState("");
 
-  const selectedAnalysisId = useMemo(() => {
-    const normalizedRole = role.toLowerCase();
-    return normalizedRole.includes("full")
-      ? "full-stack"
-      : "frontend-engineer";
-  }, [role]);
-
-  async function requestAnalysis(
-    endpoint: "ai" | "mock",
-    payload: {
-      role: string;
-      company: string;
-      resume_name: string;
-      resume_text: string;
-      job_description: string;
-    },
-  ) {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    const response = await fetch(`${apiUrl}/analysis/${endpoint}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error(`${endpoint.toUpperCase()} analysis failed`);
-    }
-
-    return response.json();
-  }
+  const selectedAnalysisId = useMemo(() => selectAnalysisId(role), [role]);
 
   async function handleAnalyze() {
     setApiError("");
     setResumeError("");
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    const cleanRole = role.trim() || "Senior Frontend Engineer";
-    const cleanCompany = company.trim() || "Acme Corp";
-    const cleanResumeName = resumeName.trim() || "Resume.pdf";
-    const cleanResumeText = resumeText.trim();
+    const cleanInput = cleanDashboardInput({
+      role,
+      company,
+      resumeName,
+      resumeText,
+    });
 
     if (resumeStatus === "extracting") {
       setResumeError("Wait for resume text extraction to finish before analyzing.");
       return;
     }
 
-    if (!cleanResumeText) {
+    if (!cleanInput.resumeText) {
       setResumeStatus("error");
       setResumeError("Choose a TXT, PDF, or DOCX resume before analyzing.");
       return;
     }
 
-    if (apiUrl) {
-      setIsAnalyzing(true);
+    setIsAnalyzing(true);
 
-      try {
-        const payload = {
-          role: cleanRole,
-          company: cleanCompany,
-          resume_name: cleanResumeName,
-          resume_text: cleanResumeText,
-          job_description: jobDescription,
-        };
-        let source = "ai";
-        let analysis;
+    try {
+      const result = await submitDashboardAnalysis({
+        apiUrl: process.env.NEXT_PUBLIC_API_URL,
+        selectedAnalysisId,
+        role: cleanInput.role,
+        company: cleanInput.company,
+        resumeName: cleanInput.resumeName,
+        resumeText: cleanInput.resumeText,
+        jobDescription,
+      });
 
-        try {
-          analysis = await requestAnalysis("ai", payload);
-        } catch {
-          source = "api";
-          analysis = await requestAnalysis("mock", payload);
-          setApiError(
-            "OpenAI analysis is unavailable, so ApplyIQ used the deterministic API mock fallback.",
-          );
-        }
-
-        sessionStorage.setItem(API_ANALYSIS_STORAGE_KEY, JSON.stringify(analysis));
-        router.push(`/analysis?source=${source}`);
-        return;
-      } catch {
-        setApiError(
-          "The API is not reachable, so ApplyIQ used the built-in mock fallback.",
-        );
-      } finally {
-        setIsAnalyzing(false);
+      if (result.apiError) {
+        setApiError(result.apiError);
       }
+
+      router.push(result.route);
+    } finally {
+      setIsAnalyzing(false);
     }
-
-    const params = new URLSearchParams({
-      id: selectedAnalysisId,
-      role: cleanRole,
-      company: cleanCompany,
-      resume: cleanResumeName,
-    });
-
-    router.push(`/analysis?${params.toString()}`);
   }
 
   async function handleResumeFileChange(file: File | undefined) {

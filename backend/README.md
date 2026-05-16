@@ -4,6 +4,28 @@ FastAPI API for the ApplyIQ full-stack demo. The deterministic mock route is the
 default safe path; optional OpenAI analysis can be enabled locally with
 environment variables.
 
+## Architecture
+
+```text
+app/
+├── controllers/
+│   ├── health_controller.py
+│   └── analysis_controller.py
+├── models/
+│   └── analysis_models.py
+├── services/
+│   └── analysis_service.py
+└── main.py
+tests/
+├── test_analysis_routes.py
+└── test_analysis_service.py
+```
+
+- Controllers own route handling and HTTP fallback responses.
+- Models own Pydantic request and response contracts.
+- Services own deterministic keyword matching, OpenAI prompt/schema handling, and analysis generation.
+- Tests cover both FastAPI routes and service-level analysis behavior.
+
 ## Run locally
 
 ```bash

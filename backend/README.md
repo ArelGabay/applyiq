@@ -1,15 +1,29 @@
 # ApplyIQ Backend
 
-Minimal FastAPI mock API for the ApplyIQ full-stack demo.
+FastAPI API for the ApplyIQ full-stack demo. The deterministic mock route is the
+default safe path; optional OpenAI analysis can be enabled locally with
+environment variables.
 
 ## Run locally
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install fastapi uvicorn
+pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
+
+Optional OpenAI analysis:
+
+```bash
+export OPENAI_API_KEY=sk-...
+export ENABLE_OPENAI_ANALYSIS=true
+export OPENAI_MODEL=gpt-5.4-mini
+uvicorn app.main:app --reload
+```
+
+If OpenAI is disabled, missing a key, or fails, the frontend falls back to the
+deterministic mock route.
 
 ## Deploy
 
@@ -23,6 +37,7 @@ Recommended Vercel settings:
 - Python version: `3.13`
 - Entry point: `app.main:app`
 - Environment variables: none required for the mock API
+- Optional AI environment variables: `OPENAI_API_KEY`, `ENABLE_OPENAI_ANALYSIS`, `OPENAI_MODEL`
 
 Production API:
 
@@ -31,7 +46,8 @@ Production API:
 ## Routes
 
 - `GET /health` returns API health.
-- `POST /analysis/mock` returns mock resume analysis JSON shaped for the frontend.
+- `POST /analysis/mock` returns deterministic resume analysis JSON shaped for the frontend.
+- `POST /analysis/ai` returns OpenAI-powered analysis when enabled, otherwise a clear fallback-ready error.
 
 Example request:
 
@@ -51,6 +67,6 @@ The frontend can call this API locally with:
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-The deployed frontend does not depend on this service yet. Real resume parsing,
-PostgreSQL persistence, OpenAI calls, and backend deployment are intentionally
-future work.
+The deployed frontend points at the public API, but production OpenAI remains
+disabled unless backend environment variables are explicitly configured.
+PostgreSQL persistence and authentication are intentionally future work.

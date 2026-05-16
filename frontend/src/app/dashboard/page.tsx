@@ -37,6 +37,32 @@ export default function DashboardPage() {
       : "frontend-engineer";
   }, [role]);
 
+  async function requestAnalysis(
+    endpoint: "ai" | "mock",
+    payload: {
+      role: string;
+      company: string;
+      resume_name: string;
+      resume_text: string;
+      job_description: string;
+    },
+  ) {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const response = await fetch(`${apiUrl}/analysis/${endpoint}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`${endpoint.toUpperCase()} analysis failed`);
+    }
+
+    return response.json();
+  }
+
   async function handleAnalyze() {
     setApiError("");
     setResumeError("");
@@ -61,27 +87,28 @@ export default function DashboardPage() {
       setIsAnalyzing(true);
 
       try {
-        const response = await fetch(`${apiUrl}/analysis/mock`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            role: cleanRole,
-            company: cleanCompany,
-            resume_name: cleanResumeName,
-            resume_text: cleanResumeText,
-            job_description: jobDescription,
-          }),
-        });
+        const payload = {
+          role: cleanRole,
+          company: cleanCompany,
+          resume_name: cleanResumeName,
+          resume_text: cleanResumeText,
+          job_description: jobDescription,
+        };
+        let source = "ai";
+        let analysis;
 
-        if (!response.ok) {
-          throw new Error("API mock analysis failed");
+        try {
+          analysis = await requestAnalysis("ai", payload);
+        } catch {
+          source = "api";
+          analysis = await requestAnalysis("mock", payload);
+          setApiError(
+            "OpenAI analysis is unavailable, so ApplyIQ used the deterministic API mock fallback.",
+          );
         }
 
-        const analysis = await response.json();
         sessionStorage.setItem(API_ANALYSIS_STORAGE_KEY, JSON.stringify(analysis));
-        router.push("/analysis?source=api");
+        router.push(`/analysis?source=${source}`);
         return;
       } catch {
         setApiError(
@@ -279,7 +306,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-sm text-slate-500">
                   {process.env.NEXT_PUBLIC_API_URL
-                    ? "Uses the configured FastAPI mock endpoint, then stores the result in this browser."
+                    ? "Uses the configured FastAPI endpoint, tries optional OpenAI analysis, then falls back safely."
                     : "This generates a polished local mock result. No files leave the browser."}
                 </p>
                 {apiError ? (

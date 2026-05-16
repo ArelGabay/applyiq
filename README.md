@@ -1,7 +1,7 @@
 # ApplyIQ
 
 AI-powered ATS resume optimization demo built with Next.js, TypeScript,
-Tailwind CSS, and a FastAPI placeholder backend.
+Tailwind CSS, and a public FastAPI mock backend.
 
 > Live demo: <https://applyiq-arel.vercel.app>  
 > Public API: <https://applyiq-api-arel.vercel.app/health>
@@ -24,7 +24,7 @@ paste a job description, and review a clear application strategy.
 - A polished multi-page product flow with realistic deterministic output and optional OpenAI analysis
 - ATS scoring, keyword gap analysis, resume rewrite examples, and cover letter preview
 - Deterministic keyword matching from uploaded resume text and job descriptions
-- Frontend-first MVP thinking with a documented FastAPI path for future backend work
+- MVC-style FastAPI backend with controller, model, service, and test layers
 - Public deployment on Vercel with a portfolio-ready README
 
 ## Demo walkthrough
@@ -76,14 +76,27 @@ paste a job description, and review a clear application strategy.
 - The frontend tries optional OpenAI analysis first, then falls back to the deterministic mock API if AI is disabled or unavailable.
 - The FastAPI mock API compares resume text against the job description using a fixed keyword bank and returns frontend-ready JSON.
 - The analysis page reads API results from `sessionStorage`; otherwise it falls back to local sample data.
+- Backend controllers own HTTP routes, models own Pydantic request/response contracts, and services own analysis business logic.
+- Frontend helper modules own API fallback, dashboard data cleanup, and session result lookup; Vitest covers those helpers.
 
 ## Project structure
 
 ```text
 applyiq/
-├── frontend/     # Next.js + TypeScript + Tailwind CSS
-├── backend/      # FastAPI placeholder
-├── AGENTS.md     # AI agent guidelines
+├── frontend/
+│   └── src/
+│       ├── app/          # Next.js routes and page composition
+│       ├── components/   # Shared UI components
+│       └── lib/          # Frontend helpers plus Vitest tests
+├── backend/
+│   ├── app/
+│   │   ├── controllers/  # FastAPI route handlers
+│   │   ├── models/       # Pydantic contracts
+│   │   ├── services/     # Mock/OpenAI analysis logic
+│   │   └── main.py       # App setup and router wiring
+│   └── tests/            # Pytest route and service tests
+├── docs/screenshots/     # README screenshots
+├── AGENTS.md
 └── README.md
 ```
 
@@ -127,8 +140,9 @@ npm run build
 
 ## Backend
 
-The backend is intentionally light for this phase. It provides a local FastAPI
-mock analysis endpoint without becoming a dependency for the deployed frontend.
+The backend is intentionally light but public for this phase. It provides a
+FastAPI mock analysis API with an MVC-style folder structure and optional
+OpenAI analysis that is disabled by default in production.
 
 ```bash
 cd backend

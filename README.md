@@ -34,6 +34,7 @@ paste a job description, and review a clear application strategy.
 3. Paste a job description and confirm the target role/company.
 4. Submit the workflow to call the public FastAPI mock API.
 5. Review the ATS-style score, matched keywords, missing keywords, rewrite examples, and cover letter preview.
+6. Return to the dashboard to reopen or clear browser-saved analyses.
 
 ## MVP status
 
@@ -41,6 +42,7 @@ paste a job description, and review a clear application strategy.
 - Dashboard workflow for TXT/PDF/DOCX resume upload, browser-side text extraction, role/company details, and job description input
 - Analysis results with deterministic mock ATS score, missing keywords, matched keywords, resume suggestions, AI rewrite examples, and cover letter preview
 - Copyable mock cover letter output
+- Browser-saved analysis history using `localStorage`, capped to the 10 most recent results
 - FastAPI mock endpoint that compares extracted resume text against the job description using a fixed keyword bank
 - Optional OpenAI backend route that can be enabled locally while preserving deterministic fallback
 
@@ -75,7 +77,8 @@ paste a job description, and review a clear application strategy.
 - When `NEXT_PUBLIC_API_URL` is configured, the dashboard sends extracted text and job details to FastAPI.
 - The frontend tries optional OpenAI analysis first, then falls back to the deterministic mock API if AI is disabled or unavailable.
 - The FastAPI mock API compares resume text against the job description using a fixed keyword bank and returns frontend-ready JSON.
-- The analysis page reads API results from `sessionStorage`; otherwise it falls back to local sample data.
+- The analysis page reads the latest API result from `sessionStorage`, saved history from `localStorage`, or local sample data as a fallback.
+- Saved analyses are browser-only records capped to the 10 most recent items; no server-side persistence is used yet.
 - Backend controllers own HTTP routes, models own Pydantic request/response contracts, and services own analysis business logic.
 - Frontend helper modules own API fallback, dashboard data cleanup, and session result lookup; Vitest covers those helpers.
 
@@ -190,7 +193,8 @@ npm run dev
 ```
 
 With `NEXT_PUBLIC_API_URL=http://localhost:8000`, the dashboard submit flow calls
-FastAPI, stores the result in `sessionStorage`, and routes to `/analysis`.
+FastAPI, stores the latest API result in `sessionStorage`, saves compact analysis
+history in `localStorage`, and routes to `/analysis`.
 Resume text is extracted in the browser and sent as `resume_text`; the API does
 not store it. The frontend tries `/analysis/ai` first, then falls back to
 `/analysis/mock` when OpenAI is disabled, missing a key, rate-limited, or errors.
@@ -231,7 +235,7 @@ Backend deployment:
 
 ## Future roadmap
 
-1. Add PostgreSQL persistence for saved analyses.
+1. Replace browser-only saved history with PostgreSQL persistence when user accounts are added.
 2. Add authentication only after the core workflow is useful.
 3. Expand OpenAI prompts/evals once real usage patterns are clearer.
 

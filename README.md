@@ -21,6 +21,7 @@ paste a job description, and review a clear application strategy.
 - Production-style Next.js app structure with TypeScript and Tailwind CSS
 - A polished multi-page product flow with realistic mock AI output
 - ATS scoring, keyword gap analysis, resume rewrite examples, and cover letter preview
+- Deterministic keyword matching from uploaded resume text and job descriptions
 - Frontend-first MVP thinking with a documented FastAPI path for future backend work
 - Public deployment on Vercel with a portfolio-ready README
 
@@ -28,9 +29,9 @@ paste a job description, and review a clear application strategy.
 
 - Landing page with product positioning and sample analysis preview
 - Dashboard workflow for TXT/PDF/DOCX resume upload, browser-side text extraction, role/company details, and job description input
-- Analysis results with ATS score, missing keywords, matched keywords, resume suggestions, AI rewrite examples, and cover letter preview
+- Analysis results with deterministic mock ATS score, missing keywords, matched keywords, resume suggestions, AI rewrite examples, and cover letter preview
 - Copyable mock cover letter output
-- Local FastAPI mock endpoint for full-stack demo development
+- FastAPI mock endpoint that compares extracted resume text against the job description using a fixed keyword bank
 
 ## Screenshots
 
@@ -52,7 +53,7 @@ paste a job description, and review a clear application strategy.
 | --------- | ----------------------------------------- |
 | Frontend  | Next.js, TypeScript, Tailwind CSS         |
 | Backend   | FastAPI, Python mock API                  |
-| Data      | Local mock data with optional API mock flow |
+| Data      | Local samples plus deterministic API mock results |
 | AI        | Mock AI output first, OpenAI planned later |
 | Database  | PostgreSQL planned later                  |
 
@@ -138,7 +139,9 @@ npm run dev
 With `NEXT_PUBLIC_API_URL=http://localhost:8000`, the dashboard submit flow calls
 FastAPI, stores the API mock result in `sessionStorage`, and routes to
 `/analysis?source=api`. Resume text is extracted in the browser and sent as
-`resume_text`; the mock API does not store it.
+`resume_text`; the mock API does not store it. The API uses deterministic keyword
+matching against a fixed skill/tool/domain bank to create believable mock scores,
+matched keywords, missing keywords, suggestions, rewrites, and cover letter copy.
 
 ## Deployment
 
@@ -173,5 +176,6 @@ Backend deployment:
 The deployed Vercel frontend intentionally works without backend environment
 variables by falling back to local mock data. This MVP deliberately avoids
 authentication, payments, real ATS integrations, LinkedIn scraping, and
-production AI calls. The goal is a fast, clean product demo that is easy to
-extend.
+production AI calls. Keyword matching is deterministic demo logic, not real ATS
+scoring or OpenAI analysis. The goal is a fast, clean product demo that is easy
+to extend.

@@ -58,8 +58,13 @@ backend.
 ```bash
 npm run lint
 npm run test
+npm run test:e2e
 npm run build
 ```
+
+`npm run test:e2e` runs Playwright browser smoke tests against a local Next.js
+dev server and uses the local mock fallback, so the backend does not need to be
+running.
 
 ## Routes
 
